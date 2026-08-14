@@ -2,7 +2,7 @@
   "name": "code-forge-ai-root",
   "private": true,
   "scripts": {
-    "build": "cd Code-Forge-AI && npx pnpm install --frozen-lockfile --prefer-offline && npx pnpm run build",
-    "start": "cd Code-Forge-AI && npx pnpm run start"
+    "build": "npx pnpm --dir ./Code-Forge-AI install --frozen-lockfile --prefer-offline && npx pnpm --dir ./Code-Forge-AI run build",
+    "start": "npx pnpm --dir ./Code-Forge-AI run start"
   }
 }
