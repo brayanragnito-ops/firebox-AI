@@ -65,3 +65,8 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - unrs-resolver
+
+ignoredBuiltDependencies: []
+
+allowBuilds:
+  esbuild: true

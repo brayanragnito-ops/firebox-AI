@@ -290,10 +290,6 @@ router.post("/projects/:projectId/deployments", (req, res) => {
   res.status(202).json(deployment);
 });
 
-<<<<<<< Updated upstream
-router.get("/usage", (_req, res) => {
-  res.json(usage);
-=======
 /**
  * POST /api/projects
  * Create a new project
@@ -994,7 +990,6 @@ router.delete("/projects/:projectId/env/:key", authMiddleware, async (req: Authe
     logger.error({ err: error as any }, "Delete env error");
     res.status(400).json({ error: message });
   }
->>>>>>> Stashed changes
 });
 
 export default router;
