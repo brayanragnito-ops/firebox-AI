@@ -12,7 +12,11 @@ fi
 if command -v pnpm >/dev/null 2>&1; then
   pnpm install --frozen-lockfile --prefer-offline || pnpm install
 else
-  npm install
+  npx pnpm install --frozen-lockfile --prefer-offline || npx pnpm install
 fi
 
-exec pnpm run start || npm run start
+if command -v pnpm >/dev/null 2>&1; then
+  exec pnpm run start
+else
+  exec npx pnpm run start
+fi
