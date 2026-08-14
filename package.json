@@ -1,0 +1,8 @@
+{
+  "name": "code-forge-ai-root",
+  "private": true,
+  "scripts": {
+    "build": "cd Code-Forge-AI && pnpm install --frozen-lockfile --prefer-offline && pnpm run build",
+    "start": "cd Code-Forge-AI && pnpm run start"
+  }
+}
