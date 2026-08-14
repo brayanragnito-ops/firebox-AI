@@ -65,11 +65,8 @@ onlyBuiltDependencies:
   - esbuild
   - msw
   - unrs-resolver
-<<<<<<< HEAD
 
 ignoredBuiltDependencies: []
 
 allowBuilds:
   esbuild: true
-=======
->>>>>>> 6c43668 (Fix pnpm lockfile configuration)
