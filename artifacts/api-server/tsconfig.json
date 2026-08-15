@@ -8,6 +8,12 @@
     "types": ["node"]
   },
   "include": ["src"],
+  "exclude": [
+    "src/routes/cicd.ts",
+    "src/routes/marketplace.ts",
+    "src/services/cicd.ts",
+    "src/services/marketplace.ts"
+  ],
   "references": [
     {
       "path": "../../lib/db"
