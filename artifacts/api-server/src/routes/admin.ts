@@ -6,6 +6,7 @@ const router = Router();
 const configuration = [
   ["MONGODB_URI", "Platform database", "Accounts, projects, activity, and deployments"],
   ["JWT_SECRET", "Session security", "Encrypted signed-in sessions"],
+  ["FIREBOX_PROJECTS_ROOT", "Workspace storage", "Persistent mounted storage for isolated project files"],
   ["OPENAI_API_KEY", "OpenAI agent", "Agent reasoning and tool calls"],
   ["GITHUB_CLIENT_ID", "GitHub OAuth", "Repository imports and source control"],
   ["GITHUB_CLIENT_SECRET", "GitHub OAuth", "Repository imports and source control"],
