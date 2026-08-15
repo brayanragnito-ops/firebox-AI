@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { Router, type Request, type Response } from "express";
+import { Router, type Response } from "express";
 import { z } from "zod";
 import { type AuthenticatedRequest } from "../middlewares/auth";
 import {

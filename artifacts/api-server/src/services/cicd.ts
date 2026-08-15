@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { db, cicdRunsTable, githubWebhooksTable, projectsTable } from "@workspace/db";
 import { eq, and, desc, gte, lte } from "drizzle-orm";
 import type { CicdRun, InsertCicdRun, GithubWebhook, InsertGithubWebhook } from "@workspace/db";
