@@ -42,10 +42,13 @@ function Brand({ compact = false }: { compact?: boolean }) {
   </Link>;
 }
 
+function useCurrentUser() { const [user, setUser] = useState<{ name: string; email: string } | null>(null); useEffect(() => { fetch('/api/profile', { credentials: 'include' }).then((response) => response.ok ? response.json() : null).then(setUser).catch(() => setUser(null)); }, []); return user; }
+
 function AppShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [location] = useLocation();
   const { toast } = useToast();
+  const user = useCurrentUser();
   return <div className="min-h-[100dvh] bg-background">
     <aside className={`fixed inset-y-0 left-0 z-40 flex w-[238px] flex-col border-r border-sidebar-border bg-sidebar px-3 py-4 transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <div className="flex items-center justify-between px-3 pb-8"><Brand /><button type="button" onClick={() => setSidebarOpen(false)} className="text-sidebar-foreground/50 lg:hidden" data-testid="button-close-sidebar"><X size={18} /></button></div>
@@ -53,20 +56,13 @@ function AppShell({ children }: { children: ReactNode }) {
       <nav className="space-y-1" aria-label="Main navigation">
         {navItems.map((item) => { const Icon = item.icon; const active = item.href === '/' ? location === '/' : location.startsWith(item.href); return <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase()}`} className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors ${active ? 'bg-sidebar-accent text-sidebar-foreground' : 'text-sidebar-foreground/58 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'}`}><Icon size={16} strokeWidth={active ? 2.3 : 1.8} /><span>{item.label}</span>{item.label === 'Projects' && <span className="ml-auto rounded bg-sidebar-foreground/10 px-1.5 py-0.5 font-mono text-[10px] text-sidebar-foreground/45">⌘P</span>}</Link>; })}
       </nav>
-      <div className="mt-8 mb-2 px-3 text-[10px] font-semibold uppercase tracking-[.16em] text-sidebar-foreground/40">Connected</div>
-      <div className="rounded-xl border border-sidebar-border bg-sidebar-accent/50 p-3">
-        <div className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/85"><Github size={14} /> GitHub <span className="ml-auto size-1.5 rounded-full bg-amber-300" /></div>
-        <p className="mt-2 text-[11px] leading-relaxed text-sidebar-foreground/45">Secure connection required to import</p>
-        <button type="button" onClick={() => toast({ title: 'Connect GitHub to continue', description: 'Authorize GitHub securely before importing repositories.' })} className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-primary-foreground/70 hover:text-primary-foreground" data-testid="button-manage-github">Connect GitHub <ArrowUpRight size={12} /></button>
-      </div>
       <div className="mt-auto">
         <div className="mb-3 rounded-xl border border-sidebar-border bg-sidebar-accent/35 p-3">
-          <div className="flex items-center justify-between text-[11px] text-sidebar-foreground/50"><span>AI credits</span><span className="font-mono text-sidebar-foreground/75">68%</span></div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-foreground/10"><div className="h-full w-[68%] rounded-full bg-primary" /></div>
-          <Link href="/settings" data-testid="link-usage-sidebar" className="mt-2 block text-[10px] text-sidebar-foreground/45 hover:text-sidebar-foreground">Resets in 12 days</Link>
+          <div className="text-[11px] text-sidebar-foreground/50">Usage tracking</div>
+          <Link href="/settings" data-testid="link-usage-sidebar" className="mt-2 block text-[10px] text-sidebar-foreground/45 hover:text-sidebar-foreground">Not configured</Link>
         </div>
         <Link href="/settings" data-testid="link-account" className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sidebar-foreground/75 hover:bg-sidebar-accent">
-          <span className="flex size-7 items-center justify-center rounded-full bg-[#e8c5a9] text-[10px] font-bold text-[#56382d]">AM</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">Alex Morgan</span><span className="block truncate text-[10px] text-sidebar-foreground/40">Pro workspace</span></span><MoreHorizontal size={15} />
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold text-primary">{user?.name?.slice(0, 1).toUpperCase() ?? 'U'}</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{user?.name ?? 'Account'}</span><span className="block truncate text-[10px] text-sidebar-foreground/40">{user?.email ?? 'Loading profile…'}</span></span><MoreHorizontal size={15} />
         </Link>
       </div>
     </aside>
