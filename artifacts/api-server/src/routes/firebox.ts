@@ -291,6 +291,9 @@ router.post("/projects/:projectId/deployments", (req, res) => {
   res.status(202).json(deployment);
 });
 
+// Legacy database-backed routes are incomplete and not mounted. Keep them
+// from executing until their auth and persistence dependencies are restored.
+if (false) {
 /**
  * POST /api/projects
  * Create a new project
@@ -992,5 +995,7 @@ router.delete("/projects/:projectId/env/:key", authMiddleware, async (req: Authe
     res.status(400).json({ error: message });
   }
 });
+
+}
 
 export default router;
