@@ -1,19 +1,20 @@
-// @ts-nocheck
-// Database schema definitions
-// Each model/table defines a Drizzle table, insert schema, and types
+// Export your models here. Add one export per file
+// export * from "./posts";
+//
+// Each model/table should ideally be split into different files.
+// Each model/table should define a Drizzle table, insert schema, and types:
+//
+//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
+//   import { createInsertSchema } from "drizzle-zod";
+//   import { z } from "zod/v4";
+//
+//   export const postsTable = pgTable("posts", {
+//     id: serial("id").primaryKey(),
+//     title: text("title").notNull(),
+//   });
+//
+//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
+//   export type InsertPost = z.infer<typeof insertPostSchema>;
+//   export type Post = typeof postsTable.$inferSelect;
 
-export * from "./users";
-export * from "./projects";
-export * from "./deployments";
-export * from "./agent-runs";
-export * from "./usage";
-export * from "./teams";
-export * from "./team-members";
-export * from "./team-invitations";
-export * from "./deployment-logs";
-export * from "./performance-metrics";
-export * from "./error-tracking";
-export * from "./cicd-runs";
-export * from "./github-webhooks";
-export * from "./extensions";
-export * from "./installed-extensions";
+export {}

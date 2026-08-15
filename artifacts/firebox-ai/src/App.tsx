@@ -4,22 +4,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ErrorBoundary } from '@/components/error-boundary';
-import { AuthProvider, useAuth } from '@/contexts/auth';
-import LoginPage from '@/pages/login';
-import SignupPage from '@/pages/signup';
-import WorkspacePage from '@/pages/workspace';
-import TeamsPage from '@/pages/teams';
-import MonitoringPage from '@/pages/monitoring';
-import CicdPage from '@/pages/cicd';
-import MarketplacePage from '@/pages/marketplace';
-import ExtensionsPage from '@/pages/extensions';
 import {
   Activity as ActivityIcon, ArrowUpRight, Box, Check, ChevronDown, ChevronRight,
   CircleAlert, CircleDot, Clock3, Code2, Cpu, Database, ExternalLink,
   FileCode2, Folder, FolderOpen, GitBranch, Github, Globe2, History, KeyRound,
   LayoutDashboard, Layers3, Menu, MoreHorizontal, Package, Play, Plus, Rocket,
   Search, Server, Settings2, ShieldCheck, Sparkles, SquareTerminal, Terminal,
-  Upload, Users, X, Zap
+  Upload, X, Zap
 } from 'lucide-react';
 import {
   getGetDashboardQueryKey, getGetDeploymentsQueryKey, getGetProjectActivityQueryKey,
@@ -39,11 +30,6 @@ const navItems = [
   { href: '/', label: 'Overview', icon: LayoutDashboard },
   { href: '/projects', label: 'Projects', icon: Layers3 },
   { href: '/deployments', label: 'Deployments', icon: Rocket },
-  { href: '/monitoring', label: 'Monitoring', icon: ActivityIcon },
-  { href: '/cicd', label: 'CI/CD', icon: GitBranch },
-  { href: '/marketplace', label: 'Marketplace', icon: Zap },
-  { href: '/extensions', label: 'Extensions', icon: Package },
-  { href: '/teams', label: 'Teams', icon: Users },
   { href: '/settings', label: 'Settings', icon: Settings2 },
 ];
 
@@ -79,7 +65,9 @@ function AppShell({ children }: { children: ReactNode }) {
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-sidebar-foreground/10"><div className="h-full w-[68%] rounded-full bg-primary" /></div>
           <Link href="/settings" data-testid="link-usage-sidebar" className="mt-2 block text-[10px] text-sidebar-foreground/45 hover:text-sidebar-foreground">Resets in 12 days</Link>
         </div>
-        <UserAccountCard />
+        <Link href="/settings" data-testid="link-account" className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sidebar-foreground/75 hover:bg-sidebar-accent">
+          <span className="flex size-7 items-center justify-center rounded-full bg-[#e8c5a9] text-[10px] font-bold text-[#56382d]">AM</span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">Alex Morgan</span><span className="block truncate text-[10px] text-sidebar-foreground/40">Pro workspace</span></span><MoreHorizontal size={15} />
+        </Link>
       </div>
     </aside>
     {sidebarOpen && <button aria-label="Close navigation" type="button" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-sidebar/30 backdrop-blur-sm lg:hidden" data-testid="button-sidebar-overlay" />}
@@ -152,18 +140,14 @@ function CreateProjectModal({ open, onClose }: { open: boolean; onClose: () => v
 
 function DashboardPage() {
   const [modal, setModal] = useState(false);
-  const { user } = useAuth();
   const dashboard = useGetDashboard({ query: { queryKey: getGetDashboardQueryKey() } });
   const projects = useGetProjects({ query: { queryKey: getGetProjectsQueryKey() } });
   const templates = useGetTemplates({ query: { queryKey: getGetTemplatesQueryKey() } });
   const deployments = useGetDeployments({ query: { queryKey: getGetDeploymentsQueryKey() } });
   const activity = dashboard.data?.recentActivity ?? [];
   const projectList = projects.data ?? [];
-  
-  const greeting = user?.name ? `Good morning, ${user.name.split(' ')[0]}.` : 'Good morning.';
-
   return <div className="firebox-grid min-h-[calc(100dvh-66px)] px-4 py-7 sm:px-7 sm:py-9">
-    <div className="mx-auto max-w-[1360px]"><PageTitle eyebrow="Command center" title={greeting} detail="Your workspace is quiet. Pick up where you left off or give Firebox a new direction." action={<button type="button" onClick={() => setModal(true)} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-[0_6px_16px_hsl(263_74%_50%/.2)] hover:brightness-105" data-testid="button-new-project"><Plus size={15} /> New project</button>} />
+    <div className="mx-auto max-w-[1360px]"><PageTitle eyebrow="Command center" title="Good morning, Alex." detail="Your workspace is quiet. Pick up where you left off or give Firebox a new direction." action={<button type="button" onClick={() => setModal(true)} className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground shadow-[0_6px_16px_hsl(263_74%_50%/.2)] hover:brightness-105" data-testid="button-new-project"><Plus size={15} /> New project</button>} />
       <QueryState loading={dashboard.isLoading} error={!!dashboard.error}>
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard label="Projects" value={dashboard.data?.projects ?? projectList.length} note="Across your workspace" icon={Layers3} tint="bg-violet-50 text-violet-600" />
@@ -218,7 +202,7 @@ function ProviderModal({ open, onClose, deployments, projects = [] }: { open: bo
 }
 
 function SettingsPage() {
-  const usage = useGetUsage({ query: { queryKey: getGetUsageQueryKey() } }); const [connected, setConnected] = useState(false); const { toast } = useToast();
+  const usage = useGetUsage({ query: { queryKey: getGetUsageQueryKey() } }); const connected = false; const { toast } = useToast();
   return <div className="firebox-grid min-h-[calc(100dvh-66px)] px-4 py-7 sm:px-7 sm:py-9"><div className="mx-auto max-w-[980px]"><PageTitle eyebrow="Workspace controls" title="Settings" detail="Account, secure connections, and the boundaries of your agent." /><div className="grid gap-5 lg:grid-cols-[210px_1fr]"><div className="hidden space-y-1 lg:block"><div className="rounded-lg bg-primary/10 px-3 py-2.5 text-xs font-bold text-primary">Account</div><div className="px-3 py-2.5 text-xs text-muted-foreground">Connections</div><div className="px-3 py-2.5 text-xs text-muted-foreground">Usage</div><div className="px-3 py-2.5 text-xs text-muted-foreground">Security</div></div><div className="space-y-5"><section className="soft-shadow rounded-xl border border-border bg-card p-5 sm:p-6"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-full bg-[#e8c5a9] font-bold text-[#56382d]">AM</span><div><h2 className="font-serif text-lg font-bold">Alex Morgan</h2><p className="text-xs text-muted-foreground">alex@northstar.dev · Pro workspace</p></div><button type="button" onClick={() => toast({ title: 'Profile editor', description: 'Profile editing is ready for your next update.' })} className="ml-auto rounded-lg border border-border px-3 py-2 text-xs font-semibold hover:bg-muted" data-testid="button-edit-profile">Edit profile</button></div></section><section className="soft-shadow rounded-xl border border-border bg-card p-5 sm:p-6"><div className="flex items-start justify-between"><div><h2 className="font-serif text-lg font-bold">Connections</h2><p className="mt-1 text-xs text-muted-foreground">External access is explicit, scoped, and revocable.</p></div><ShieldCheck size={19} className="text-emerald-600" /></div><div className="mt-5 flex items-center gap-3 rounded-lg border border-border p-3"><span className="flex size-9 items-center justify-center rounded-lg bg-foreground text-background"><Github size={17} /></span><div className="min-w-0 flex-1"><div className="text-xs font-semibold">GitHub</div><div className="mt-0.5 text-[11px] text-muted-foreground">{connected ? 'Connected as alex-morgan · selected repositories only' : 'Not connected'}</div></div><button type="button" onClick={() => { setConnected(!connected); toast({ title: connected ? 'GitHub disconnected' : 'GitHub connected', description: connected ? 'Existing imports remain available.' : 'Choose repositories when you import.' }); }} className={`rounded-md px-3 py-1.5 text-[11px] font-bold ${connected ? 'border border-border hover:bg-muted' : 'bg-primary text-primary-foreground'}`} data-testid="button-toggle-github">{connected ? 'Disconnect' : 'Connect'}</button></div></section><section className="soft-shadow rounded-xl border border-border bg-card p-5 sm:p-6"><div className="flex items-start justify-between"><div><h2 className="font-serif text-lg font-bold">Usage & limits</h2><p className="mt-1 text-xs text-muted-foreground">Your current billing period at a glance.</p></div><Cpu size={19} className="text-primary" /></div><QueryState loading={usage.isLoading} error={!!usage.error}><div className="mt-5 grid gap-4 sm:grid-cols-2"><div className="rounded-lg bg-muted/60 p-4"><div className="text-[10px] font-bold uppercase tracking-[.13em] text-muted-foreground">AI credits</div><div className="mt-2 font-mono text-xl font-semibold">{usage.data?.creditsUsed.toLocaleString()} <span className="text-xs text-muted-foreground">/ {usage.data?.creditsTotal.toLocaleString()}</span></div></div><div className="rounded-lg bg-muted/60 p-4"><div className="text-[10px] font-bold uppercase tracking-[.13em] text-muted-foreground">Compute hours</div><div className="mt-2 font-mono text-xl font-semibold">{usage.data?.computeUsed.toFixed(1)} <span className="text-xs text-muted-foreground">/ {usage.data?.computeTotal.toFixed(1)} h</span></div></div></div></QueryState></section><section className="soft-shadow rounded-xl border border-border bg-card p-5 sm:p-6"><div className="flex items-start justify-between"><div><h2 className="font-serif text-lg font-bold">Security</h2><p className="mt-1 text-xs text-muted-foreground">Keep your projects and agent actions protected.</p></div><KeyRound size={19} className="text-primary" /></div><div className="mt-5 divide-y divide-border rounded-lg border border-border"><SecurityRow label="Two-factor authentication" detail="Recommended for workspace owners" action="Enable" onClick={() => toast({ title: 'Two-factor setup', description: 'A secure setup flow will open here.' })} /><SecurityRow label="Agent permission mode" detail="Ask before external or destructive actions" action="Configure" onClick={() => toast({ title: 'Permissions saved', description: 'Firebox will ask before sensitive actions.' })} /></div></section></div></div></div></div>;
 }
 function SecurityRow({ label, detail, action, onClick }: { label: string; detail: string; action: string; onClick: () => void }) { return <div className="flex items-center gap-3 p-3"><div className="flex-1"><div className="text-xs font-semibold">{label}</div><div className="mt-0.5 text-[11px] text-muted-foreground">{detail}</div></div><button type="button" onClick={onClick} className="rounded-md border border-border px-3 py-1.5 text-[11px] font-bold hover:bg-muted" data-testid={`button-security-${label.toLowerCase().replaceAll(' ', '-')}`}>{action}</button></div>; }
@@ -237,119 +221,6 @@ function PreviewSurface() { const { toast } = useToast(); return <div className=
 function TerminalSurface() { return <div className="h-full min-h-[420px] bg-[#11101a] p-5 font-mono text-[11px] leading-7 text-white/60"><div className="mb-5 flex items-center gap-2 text-white/35"><SquareTerminal size={14} /> Terminal <span className="ml-auto text-emerald-400">process running</span></div><div><span className="text-[#a991e9]">~/launchpad</span> $ pnpm dev</div><div className="text-emerald-400">ready - started server on 0.0.0.0:3000</div><div><span className="text-white/30">○</span> compiling / ...</div><div className="text-white/40">✓ compiled client and server in 421ms</div><div className="mt-5 text-white/35">Watching for file changes...</div><div className="mt-5"><span className="text-[#a991e9]">~/launchpad</span> $ <span className="animate-pulse">▌</span></div></div>; }
 function ActivityTray({ activities, loading, intelligence }: { activities: Activity[]; loading: boolean; intelligence?: { language: string; framework: string; runtime: string; packageManager: string; buildTool: string; confidence: number; structure: string[]; database?: string | null } }) { return <aside className="w-[285px] shrink-0 overflow-y-auto border-l border-white/10 bg-[#242038] p-4 sm:w-[320px]"><div className="flex items-center justify-between"><div><div className="text-[10px] font-bold uppercase tracking-[.15em] text-white/40">Agent activity</div><div className="mt-1 text-xs font-semibold text-white/85">Operational timeline</div></div><span className="flex items-center gap-1.5 text-[10px] text-emerald-400"><span className="pulse-dot size-1.5 rounded-full bg-current" /> Live</span></div><div className="mt-5 rounded-lg border border-white/10 bg-[#1c1a2a] p-3"><div className="flex items-center justify-between text-[10px] text-white/45"><span>Current run</span><span className="font-mono text-white/30">#fb-204</span></div><div className="mt-3 text-xs font-semibold text-white/80">Ready for instruction</div><div className="mt-3 h-1 rounded-full bg-white/10"><div className="h-full w-[72%] rounded-full bg-primary" /></div><div className="mt-2 text-[10px] text-white/35">Waiting for your next change</div></div><div className="mt-6"><div className="mb-3 text-[10px] font-bold uppercase tracking-[.13em] text-white/35">Timeline</div>{loading ? <div className="space-y-3"><SkeletonBlock className="h-10 bg-white/10" /><SkeletonBlock className="h-10 bg-white/10" /></div> : activities.length ? <div className="space-y-0">{activities.map((a, i) => <div key={a.id} className="relative flex gap-3 pb-5">{i < activities.length - 1 && <span className="absolute left-[5px] top-3 h-full w-px bg-white/10" />}<span className={`relative z-10 mt-0.5 size-2.5 shrink-0 rounded-full border-2 ${a.status === 'active' ? 'border-primary bg-primary' : a.status === 'failed' ? 'border-red-400 bg-red-400' : 'border-emerald-400 bg-[#242038]'}`} /><div className="min-w-0"><div className="text-[11px] font-semibold text-white/80">{a.label}</div><div className="mt-1 text-[10px] leading-relaxed text-white/35">{a.detail ?? 'Completed successfully'}</div><div className="mt-1 font-mono text-[9px] text-white/25">{new Date(a.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div></div></div>)}</div> : <p className="text-[11px] text-white/35">No operations recorded yet.</p>}</div><div className="mt-4 border-t border-white/10 pt-5"><div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.13em] text-white/35"><Database size={12} /> Project intelligence</div>{intelligence ? <div className="grid grid-cols-2 gap-2">{[['Language', intelligence.language], ['Framework', intelligence.framework], ['Runtime', intelligence.runtime], ['Build', intelligence.buildTool]].map(([k, v]) => <div key={k} className="rounded-md bg-white/[.04] p-2"><div className="text-[9px] text-white/30">{k}</div><div className="mt-1 truncate text-[10px] font-semibold text-white/70">{v}</div></div>)}</div> : <div className="space-y-2"><SkeletonBlock className="h-7 bg-white/10" /><SkeletonBlock className="h-7 bg-white/10" /></div>}</div></aside>; }
 
-function UserAccountCard() {
-  const { user, logout } = useAuth();
-  const [, setLocation] = useLocation();
-  const { toast } = useToast();
-
-  if (!user) return null;
-
-  const initials = user.name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
-
-  const handleLogout = () => {
-    logout();
-    setLocation('/login');
-    toast({ title: 'Signed out', description: 'You have been logged out successfully.' });
-  };
-
-  return (
-    <div className="group relative">
-      <button
-        type="button"
-        className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sidebar-foreground/75 hover:bg-sidebar-accent"
-        data-testid="link-account"
-      >
-        <span className="flex size-7 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-          {initials}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-xs font-semibold">{user.name}</span>
-          <span className="block truncate text-[10px] text-sidebar-foreground/40">
-            {user.plan} workspace
-          </span>
-        </span>
-        <MoreHorizontal size={15} />
-      </button>
-      <div className="absolute bottom-full left-0 right-0 mb-2 hidden rounded-lg border border-border bg-card shadow-lg group-hover:block">
-        <Link
-          href="/settings"
-          className="flex items-center gap-2 px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted rounded-t-lg"
-        >
-          <Settings2 size={14} /> Settings
-        </Link>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-b-lg border-t border-border"
-        >
-          <X size={14} /> Sign out
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function AppRouter() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <ErrorBoundary resetKey={useLocation()[0]}>
-        <Switch>
-          <Route path="/login" component={LoginPage} />
-          <Route path="/signup" component={SignupPage} />
-          <Route component={LoginPage} />
-        </Switch>
-      </ErrorBoundary>
-    );
-  }
-
-  return (
-    <ErrorBoundary resetKey={useLocation()[0]}>
-      <AppShell>
-        <Switch>
-          <Route path="/" component={DashboardPage} />
-          <Route path="/projects" component={ProjectsPage} />
-          <Route path="/deployments" component={DeploymentsPage} />
-          <Route path="/monitoring" component={MonitoringPage} />
-          <Route path="/cicd" component={CicdPage} />
-          <Route path="/marketplace" component={MarketplacePage} />
-          <Route path="/extensions" component={ExtensionsPage} />
-          <Route path="/teams" component={TeamsPage} />
-          <Route path="/settings" component={SettingsPage} />
-          <Route path="/workspace/:projectId" component={WorkspacePage} />
-          <Route component={NotFound} />
-        </Switch>
-      </AppShell>
-    </ErrorBoundary>
-  );
-}
-function App() {
-  return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-            <AppRouter />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
-    </AuthProvider>
-  );
-}
+function Router() { return <ErrorBoundary resetKey={useLocation()[0]}><Switch><Route path="/" component={DashboardPage} /><Route path="/projects" component={ProjectsPage} /><Route path="/deployments" component={DeploymentsPage} /><Route path="/settings" component={SettingsPage} /><Route path="/workspace/:projectId" component={WorkspacePage} /><Route component={NotFound} /></Switch></ErrorBoundary>; }
+function App() { return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><AppShell><Router /></AppShell></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>; }
 export default App;

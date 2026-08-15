@@ -11,16 +11,8 @@
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
-  "dependencies": {
-    "@replit/connectors-sdk": "^0.4.1",
-    "esbuild": "0.27.3"
-  },
   "devDependencies": {
-    "@esbuild/win32-x64": "0.27.3",
-    "@rollup/rollup-win32-x64-msvc": "^4.46.0",
-    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
     "cross-env": "^7.0.1",
-    "lightningcss-win32-x64-msvc": "^1.32.0",
     "prettier": "^3.9.6",
     "typescript": "~5.9.3"
   }
