@@ -1,8 +1,27 @@
 {
-  "name": "code-forge-ai-root",
-  "private": true,
+  "name": "workspace",
+  "version": "0.0.0",
+  "packageManager": "pnpm@11.10.0",
+  "license": "MIT",
   "scripts": {
-    "build": "npx pnpm --dir ./Code-Forge-AI install --frozen-lockfile --prefer-offline && npx pnpm --dir ./Code-Forge-AI run build",
-    "start": "npx pnpm --dir ./Code-Forge-AI run start"
+    "preinstall": "node -e \"const fs=require('fs'); ['package-lock.json','yarn.lock'].forEach(f=>{try{fs.rmSync(f,{force:true});}catch{}}); const ua=process.env.npm_config_user_agent||''; if(!ua.startsWith('pnpm/')) { console.error('Use pnpm instead'); process.exit(1); }\"",
+    "build": "cross-env PORT=8080 BASE_PATH=/ pnpm run typecheck && cross-env PORT=8080 BASE_PATH=/ pnpm -r --if-present run build",
+    "start": "cross-env NODE_ENV=production node --enable-source-maps artifacts/api-server/dist/index.mjs",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+  },
+  "private": true,
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.1",
+    "esbuild": "0.27.3"
+  },
+  "devDependencies": {
+    "@esbuild/win32-x64": "0.27.3",
+    "@rollup/rollup-win32-x64-msvc": "^4.46.0",
+    "@tailwindcss/oxide-win32-x64-msvc": "^4.3.3",
+    "cross-env": "^7.0.1",
+    "lightningcss-win32-x64-msvc": "^1.32.0",
+    "prettier": "^3.9.6",
+    "typescript": "~5.9.3"
   }
 }

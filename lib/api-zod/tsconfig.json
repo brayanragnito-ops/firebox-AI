@@ -5,11 +5,7 @@
     "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"],
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "skipLibCheck": true
+    "rootDir": "src"
   },
   "include": ["src"]
 }
