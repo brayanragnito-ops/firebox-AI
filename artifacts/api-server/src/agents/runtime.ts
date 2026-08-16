@@ -4,6 +4,8 @@ import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { analyzeWorkspace, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../services/workspace";
 import type { AgentDefinition, AgentId, AgentEventStatus, ProviderId, ToolName } from "./contracts";
+import { providerForAgent } from "./provider-factory";
+import type { AIProvider } from "./providers";
 export type { AgentId, ProviderId } from "./contracts";
 
 const exec = promisify(execFile);
@@ -21,39 +23,9 @@ export const agentCatalog: Record<AgentId, AgentDefinition> = {
   vanguard: { id: "vanguard", provider: "fable5", role: "advanced-coding", label: "Vanguard", positioning: "Advanced Coding", modelVariable: "VANGUARD_MODEL", apiKeyVariable: "FABLE5_API_KEY", capabilities: ["advanced coding", "complex refactoring", "large changes"] },
 };
 
-export interface AIProvider {
-  generate(input: { system: string; prompt: string }): Promise<{ text: string; inputTokens?: number; outputTokens?: number }>;
-  getModelInfo(): { provider: ProviderId; model: string };
-}
+export type { AIProvider } from "./providers";
 
-function requiredConfiguration(agent: AgentId) {
-  const config = agentCatalog[agent];
-  const apiKey = process.env[config.apiKeyVariable];
-  const model = process.env[config.modelVariable];
-  if (config.provider === "gemini" || config.provider === "fable5") throw new Error(`${config.label} is not available yet because the ${config.provider} adapter is not configured.`);
-  if (!apiKey) throw new Error(`${config.label} is temporarily unavailable. Check the ${config.apiKeyVariable} configuration.`);
-  if (!model) throw new Error(`${config.label} is temporarily unavailable. Configure ${config.modelVariable} before running this Agent.`);
-  return { apiKey, model, provider: config.provider };
-}
-
-class HttpProvider implements AIProvider {
-  constructor(private readonly agent: AgentId) {}
-  getModelInfo() { const { provider, model } = requiredConfiguration(this.agent); return { provider, model }; }
-  async generate(input: { system: string; prompt: string }) {
-    const { apiKey, model, provider } = requiredConfiguration(this.agent);
-    const response = provider === "anthropic"
-      ? await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" }, body: JSON.stringify({ model, max_tokens: 4096, system: input.system, messages: [{ role: "user", content: input.prompt }] }) })
-      : await fetch(provider === "groq" ? "https://api.groq.com/openai/v1/chat/completions" : provider === "openrouter" ? "https://openrouter.ai/api/v1/chat/completions" : "https://api.openai.com/v1/chat/completions", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` }, body: JSON.stringify({ model, messages: [{ role: "system", content: input.system }, { role: "user", content: input.prompt }] }) });
-    const body = await response.json().catch(() => ({})) as Record<string, unknown>;
-    if (!response.ok) throw new Error(typeof body.error === "object" && body.error && "message" in body.error ? String(body.error.message) : `${provider} request failed with HTTP ${response.status}`);
-    if (provider === "anthropic") { const content = Array.isArray(body.content) ? body.content[0] : null; return { text: content && typeof content === "object" && "text" in content ? String(content.text) : "", inputTokens: Number((body.usage as Record<string, unknown> | undefined)?.input_tokens ?? 0), outputTokens: Number((body.usage as Record<string, unknown> | undefined)?.output_tokens ?? 0) }; }
-    const choices = Array.isArray(body.choices) ? body.choices : [];
-    const message = choices[0] && typeof choices[0] === "object" && "message" in choices[0] ? (choices[0] as Record<string, unknown>).message : null;
-    return { text: message && typeof message === "object" && "content" in message ? String(message.content) : "", inputTokens: Number((body.usage as Record<string, unknown> | undefined)?.prompt_tokens ?? 0), outputTokens: Number((body.usage as Record<string, unknown> | undefined)?.completion_tokens ?? 0) };
-  }
-}
-
-export function providerFor(agent: AgentId): AIProvider { return new HttpProvider(agent); }
+export function providerFor(agent: AgentId): AIProvider { return providerForAgent(agent, agentCatalog[agent]); }
 export function getProviderStatus() { return Object.fromEntries([...new Set(Object.values(agentCatalog).map((agent) => agent.provider))].map((provider) => { const agent = Object.values(agentCatalog).find((item) => item.provider === provider)!; return [provider, { variable: agent.apiKeyVariable, configured: Boolean(process.env[agent.apiKeyVariable]), model: process.env[agent.modelVariable] ?? null, supported: provider !== "gemini" && provider !== "fable5" }]; })); }
 
 function safeWorkspacePath(root: string, relativePath: string) { const target = path.resolve(root, relativePath); if (target !== root && !target.startsWith(`${root}${path.sep}`)) throw new Error("Path escapes the project workspace"); return target; }
