@@ -1,0 +1,8 @@
+import { randomUUID } from "node:crypto";
+import { adminSettings } from "./mongo";
+
+export type AdminSettings = { _id: string; deployments: { vercel: boolean; railway: boolean; render: boolean }; github: { enabled: boolean }; authentication: { registrationEnabled: boolean }; updatedAt: Date; updatedBy: string | null };
+const defaults = (): AdminSettings => ({ _id: "global", deployments: { vercel: true, railway: true, render: true }, github: { enabled: false }, authentication: { registrationEnabled: true }, updatedAt: new Date(), updatedBy: null });
+export async function getAdminSettings(): Promise<AdminSettings> { const collection = await adminSettings(); const existing = await collection.findOne({ _id: "global" }); if (existing) return existing; const created = defaults(); await collection.insertOne(created); return created; }
+export async function updateAdminSettings(userId: string, patch: Partial<Pick<AdminSettings, "deployments" | "github" | "authentication">>): Promise<AdminSettings> { const collection = await adminSettings(); const current = await getAdminSettings(); const updated: AdminSettings = { ...current, deployments: { ...current.deployments, ...(patch.deployments ?? {}) }, github: { ...current.github, ...(patch.github ?? {}) }, authentication: { ...current.authentication, ...(patch.authentication ?? {}) }, updatedAt: new Date(), updatedBy: userId }; await collection.replaceOne({ _id: "global" }, updated, { upsert: true }); return updated; }
+export function publicAdminSettings(settings: AdminSettings) { return { deployments: settings.deployments, github: settings.github, authentication: settings.authentication, updatedAt: settings.updatedAt.toISOString() }; }
