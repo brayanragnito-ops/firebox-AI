@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { readFile, writeFile, mkdir, rm, readdir } from "node:fs/promises";
 import path from "node:path";
-import { analyzeWorkspace, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../services/workspace";
+import { analyzeWorkspace, ensureWorkspace, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../services/workspace";
 import type { AgentDefinition, AgentId, AgentEventStatus, ProviderId, ToolName } from "./contracts";
 import { providerForAgent } from "./provider-factory";
 import type { AIProvider } from "./providers";
@@ -63,4 +63,4 @@ export function createProjectTools(userId: string, projectId: string) {
   };
 }
 
-export async function buildAgentContext(userId: string, projectId: string) { const tools = createProjectTools(userId, projectId); const [intelligence, files] = await Promise.all([tools.inspect_project(), tools.list_files()]); return JSON.stringify({ intelligence, files: files.slice(0, 200) }); }
+export async function buildAgentContext(userId: string, projectId: string) { await ensureWorkspace(userId, projectId); const tools = createProjectTools(userId, projectId); const [intelligence, files] = await Promise.all([tools.inspect_project(), tools.list_files()]); return JSON.stringify({ intelligence, files: files.slice(0, 200) }); }

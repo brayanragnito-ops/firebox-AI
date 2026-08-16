@@ -1,7 +1,7 @@
 import path from "node:path";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 
-function root() { const value = process.env.FIREBOX_PROJECTS_ROOT; if (!value) throw new Error("FIREBOX_PROJECTS_ROOT is not configured"); return path.resolve(value); }
+function root() { return path.resolve(process.env.FIREBOX_PROJECTS_ROOT ?? path.resolve(process.cwd(), ".firebox-workspaces")); }
 function safe(value: string, label: string) { if (!/^[a-zA-Z0-9_-]+$/.test(value)) throw new Error(`Invalid ${label}`); return value; }
 export function workspacePath(userId: string, projectId: string, relativePath = "") { const workspace = path.resolve(root(), safe(userId, "user"), safe(projectId, "project")); const target = path.resolve(workspace, relativePath); if (target !== workspace && !target.startsWith(`${workspace}${path.sep}`)) throw new Error("Path escapes project workspace"); return { workspace, target }; }
 export async function ensureWorkspace(userId: string, projectId: string) { const { workspace } = workspacePath(userId, projectId); await mkdir(workspace, { recursive: true }); return workspace; }
