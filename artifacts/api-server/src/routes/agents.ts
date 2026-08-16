@@ -5,6 +5,7 @@ import { agentIds, type AgentEventStatus, type AgentId } from "../agents/contrac
 import { projects } from "../services/mongo";
 import { orchestrateTask } from "../agents/orchestrator";
 import { appendAgentEvent, createAgentRun, getAgentRun, listAgentEvents, updateAgentRun } from "../services/agent-runs";
+import { recordUsage } from "../services/usage";
 
 const router = Router();
 const validAgents = new Set<string>(agentIds);
@@ -74,13 +75,17 @@ async function executeRun(run: Awaited<ReturnType<typeof createAgentRun>>) {
     await add("active", "Requesting implementation plan", `${provider.getModelInfo().provider} model execution started.`);
     const result = await provider.generate({ system: `You are ${agentCatalog[run.agent].positioning} in Firebox AI. Work only from the supplied project context. Explain the concrete next operation; never claim a file changed unless a tool changed it.`, prompt: `${run.prompt}\n\nProject context:\n${context}` });
     const tokensUsed = (result.inputTokens ?? 0) + (result.outputTokens ?? 0);
-    await updateAgentRun(run.id, run.userId, { status: "completed", tokensUsed, apiCalls: 1, computeSeconds: Math.round((Date.now() - started) / 1000), completedAt: new Date() });
-    await add("complete", "Agent response received", result.text.slice(0, 280) || "The provider returned no text.", { tokensUsed });
+    const computeSeconds = Math.round((Date.now() - started) / 1000);
+    await updateAgentRun(run.id, run.userId, { status: "completed", tokensUsed, apiCalls: 1, computeSeconds, completedAt: new Date() });
+    await recordUsage(run.userId, { tokens: tokensUsed, computeSeconds, apiCalls: 1 });
+    await add("complete", "Agent response received", result.text.slice(0, 280) || "The provider returned no text.", { tokensUsed, computeSeconds });
     await add("complete", "Run complete", `${tokensUsed} provider tokens recorded.`, { tokensUsed });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Agent execution failed";
-    await updateAgentRun(run.id, run.userId, { status: "failed", error: message, apiCalls: 1, computeSeconds: Math.round((Date.now() - started) / 1000), completedAt: new Date() });
-    await add("failed", "Run failed", message);
+    const computeSeconds = Math.round((Date.now() - started) / 1000);
+    await updateAgentRun(run.id, run.userId, { status: "failed", error: message, apiCalls: 1, computeSeconds, completedAt: new Date() });
+    await recordUsage(run.userId, { tokens: 0, computeSeconds, apiCalls: 1 });
+    await add("failed", "Run failed", message, { computeSeconds });
   }
 }
 

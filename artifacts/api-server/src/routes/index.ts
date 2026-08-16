@@ -5,6 +5,7 @@ import liveRouter from "./live";
 import adminRouter from "./admin";
 import workspaceRouter from "./workspace";
 import agentsRouter from "./agents";
+import usageRouter from "./usage";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(liveRouter);
 router.use(adminRouter);
 router.use(workspaceRouter);
 router.use(agentsRouter);
+router.use(usageRouter);
 
 export default router;
