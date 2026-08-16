@@ -3,6 +3,7 @@ import { authMiddleware, type AuthenticatedRequest } from "../middlewares/auth";
 import { agentCatalog, buildAgentContext, getProviderStatus, providerFor } from "../agents/runtime";
 import { agentIds, type AgentEventStatus, type AgentId } from "../agents/contracts";
 import { projects } from "../services/mongo";
+import { orchestrateTask } from "../agents/orchestrator";
 import { appendAgentEvent, createAgentRun, getAgentRun, listAgentEvents, updateAgentRun } from "../services/agent-runs";
 
 const router = Router();
@@ -44,12 +45,19 @@ router.post("/projects/:projectId/agent-runs", authMiddleware, async (req: Authe
     return;
   }
   let agent: AgentId = requestedAgent === "auto" ? "forge" : requestedAgent as AgentId;
+  let rationale = requestedAgent === "auto" ? "Auto mode is evaluating the task and project context." : `Using ${agentCatalog[agent].positioning}.`;
   if (requestedAgent === "auto") {
-    const text = prompt.toLowerCase();
-    agent = /deploy|end-to-end|autonomous|test everything/.test(text) ? "titan" : /architect|refactor|migration|performance|large/.test(text) ? "nexus" : /api|backend|database|auth|payment|full-stack/.test(text) ? "forge" : "spark";
+    try {
+      const decision = await orchestrateTask(req.user!.id, projectId, prompt);
+      agent = decision.agent;
+      rationale = decision.rationale;
+    } catch (error) {
+      res.status(503).json({ error: error instanceof Error ? error.message : "Auto mode is unavailable." });
+      return;
+    }
   }
   const run = await createAgentRun({ userId: req.user!.id, projectId, agent, prompt, selectedBy: requestedAgent === "auto" ? "auto" : "user" });
-  await appendAgentEvent({ runId: run.id, projectId, userId: req.user!.id, kind: "agent", status: "complete", label: `${agentCatalog[agent].label} selected`, detail: requestedAgent === "auto" ? `Auto routed this task to ${agentCatalog[agent].positioning}.` : `Using ${agentCatalog[agent].provider}.`, tool: null, metadata: { selectedBy: requestedAgent === "auto" ? "auto" : "user" } });
+  await appendAgentEvent({ runId: run.id, projectId, userId: req.user!.id, kind: "agent", status: "complete", label: `${agentCatalog[agent].label} selected`, detail: rationale, tool: null, metadata: { selectedBy: requestedAgent === "auto" ? "auto" : "user", rationale } });
   res.status(202).json({ ...run, currentOperation: "Inspecting project" });
   void executeRun(run).catch(() => undefined);
 });
