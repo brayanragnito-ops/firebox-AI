@@ -1,4 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { maxProcessSeconds } from "./security";
 
 export type ManagedProcess = { id: string; pid: number | undefined; command: string; args: string[]; status: "running" | "exited" | "failed"; output: string; startedAt: string; exitCode: number | null };
 const processes = new Map<string, { child: ChildProcessWithoutNullStreams; record: ManagedProcess }>();
@@ -10,7 +11,8 @@ export function startManagedProcess(command: string, args: string[], cwd: string
   child.stdout.on("data", append);
   child.stderr.on("data", append);
   child.once("error", (error) => { record.status = "failed"; record.output = `${record.output}${error.message}`.slice(-200_000); });
-  child.once("exit", (code) => { record.status = code === 0 ? "exited" : "failed"; record.exitCode = code; });
+  const timeout = setTimeout(() => { if (record.status === "running") { record.status = "failed"; record.output = `${record.output}\\nProcess stopped after the configured execution limit.`.slice(-200_000); child.kill("SIGTERM"); } }, maxProcessSeconds() * 1000);
+  child.once("exit", (code) => { clearTimeout(timeout); record.status = code === 0 ? "exited" : "failed"; record.exitCode = code; });
   processes.set(record.id, { child, record });
   return record;
 }

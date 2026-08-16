@@ -7,6 +7,7 @@ import type { AgentDefinition, AgentId, AgentEventStatus, ProviderId, ToolName }
 import { providerForAgent } from "./provider-factory";
 import type { AIProvider } from "./providers";
 import { getManagedProcess, getManagedProcessOutput, startManagedProcess, stopManagedProcess } from "./process-manager";
+import { validateCommand } from "./security";
 export type { AgentId, ProviderId } from "./contracts";
 
 const exec = promisify(execFile);
@@ -33,7 +34,7 @@ function safeWorkspacePath(root: string, relativePath: string) { const target = 
 async function searchWorkspace(root: string, relativeDirectory: string, query: string): Promise<string[]> { const target = safeWorkspacePath(root, relativeDirectory); const entries = await readdir(target, { withFileTypes: true }); const results: string[] = []; for (const entry of entries) { if (["node_modules", ".git", "dist", "build"].includes(entry.name)) continue; const relative = path.relative(root, path.join(target, entry.name)).replaceAll("\\\\", "/"); if (entry.isDirectory()) results.push(...await searchWorkspace(root, relative, query)); else if (entry.name.toLowerCase().includes(query.toLowerCase())) results.push(relative); } return results; }
 export function createProjectTools(userId: string, projectId: string) {
   const root = path.resolve(process.env.FIREBOX_PROJECTS_ROOT ?? path.resolve(process.cwd(), ".firebox-workspaces"), userId, projectId);
-  const command = (name: string, args: string[] = []) => exec(name, args, { cwd: root, timeout: 120000, maxBuffer: 1024 * 1024 });
+  const command = (name: string, args: string[] = []) => exec(validateCommand(name), args, { cwd: root, timeout: 120000, maxBuffer: 1024 * 1024 });
   const tool = <T>(name: ToolName, execute: () => Promise<T>) => async () => execute();
   return {
     list_files: tool("list_files", () => listWorkspace(userId, projectId)),
@@ -48,7 +49,7 @@ export function createProjectTools(userId: string, projectId: string) {
     install_package: (manager: string, packageName: string) => command(manager, ["add", packageName]),
     run_tests: (name: string, args: string[] = []) => command(name, args),
     build_project: (name: string, args: string[] = []) => command(name, args),
-    start_project: (name: string, args: string[] = []) => Promise.resolve(startManagedProcess(name, args, root)),
+    start_project: (name: string, args: string[] = []) => Promise.resolve(startManagedProcess(validateCommand(name), args, root)),
     get_process_status: (processId: string) => getManagedProcess(processId),
     get_terminal_output: (processId: string) => getManagedProcessOutput(processId),
     stop_project: (processId: string) => Promise.resolve(stopManagedProcess(processId)),
