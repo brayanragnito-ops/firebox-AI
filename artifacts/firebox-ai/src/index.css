@@ -79,29 +79,29 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  --background: 246 33% 98%;
+  --background: 150 18% 5%;
 
-  --foreground: 248 35% 16%;
+  --foreground: 140 18% 94%;
 
-  --border: 247 24% 90%;
+  --border: 145 18% 18%;
 
-  --card: 0 0% 100%;
+  --card: 150 16% 9%;
 
-  --card-foreground: 248 35% 16%;
+  --card-foreground: 140 18% 94%;
 
-  --card-border: 247 24% 90%;
+  --card-border: 145 18% 18%;
 
-  --sidebar: 251 36% 16%;
+  --sidebar: 150 22% 7%;
 
-  --sidebar-foreground: 246 38% 93%;
+  --sidebar-foreground: 140 24% 92%;
 
-  --sidebar-border: 251 28% 25%;
+  --sidebar-border: 145 18% 18%;
 
-  --sidebar-primary: 265 90% 69%;
+  --sidebar-primary: 145 72% 48%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
-  --sidebar-accent: 251 29% 23%;
+  --sidebar-accent: 145 24% 14%;
 
   --sidebar-accent-foreground: 246 38% 93%;
 
@@ -113,17 +113,17 @@
 
   --popover-border: 247 24% 90%;
 
-  --primary: 263 74% 50%;
+  --primary: 145 72% 42%;
 
-  --primary-foreground: 0 0% 100%;
+  --primary-foreground: 150 25% 5%;
 
-  --secondary: 248 32% 95%;
+  --secondary: 145 20% 14%;
 
-  --secondary-foreground: 248 35% 20%;
+  --secondary-foreground: 140 24% 92%;
 
-  --muted: 247 24% 94%;
+  --muted: 145 16% 13%;
 
-  --muted-foreground: 248 12% 48%;
+  --muted-foreground: 140 10% 62%;
 
   --accent: 36 96% 92%;
 
@@ -133,11 +133,11 @@
 
   --destructive-foreground: 0 0% 100%;
 
-  --input: 247 22% 85%;
-  --ring: 263 74% 50%;
-  --chart-1: 263 74% 50%;
-  --chart-2: 172 64% 42%;
-  --chart-3: 36 88% 57%;
+  --input: 145 18% 24%;
+  --ring: 145 72% 48%;
+  --chart-1: 145 72% 48%;
+  --chart-2: 165 70% 42%;
+  --chart-3: 82 72% 52%;
   --chart-4: 5 74% 54%;
   --chart-5: 211 76% 54%;
 
@@ -242,7 +242,7 @@
 
   --sidebar: 250 34% 8%;
 
-  --sidebar-foreground: 246 38% 93%;
+  --sidebar-foreground: 140 24% 92%;
 
   --sidebar-border: 250 24% 19%;
 
@@ -439,17 +439,17 @@
 }
 
 .firebox-grid {
-  background-image: linear-gradient(to right, hsl(248 30% 90% / .42) 1px, transparent 1px), linear-gradient(to bottom, hsl(248 30% 90% / .42) 1px, transparent 1px);
+  background-image: linear-gradient(to right, hsl(145 30% 24% / .22) 1px, transparent 1px), linear-gradient(to bottom, hsl(145 30% 24% / .22) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 .dark .firebox-grid {
-  background-image: linear-gradient(to right, hsl(248 30% 30% / .2) 1px, transparent 1px), linear-gradient(to bottom, hsl(248 30% 30% / .2) 1px, transparent 1px);
+  background-image: linear-gradient(to right, hsl(145 30% 32% / .2) 1px, transparent 1px), linear-gradient(to bottom, hsl(145 30% 32% / .2) 1px, transparent 1px);
 }
 .brand-mark {
-  background: linear-gradient(145deg, hsl(263 84% 61%), hsl(283 74% 50%));
-  box-shadow: 0 7px 18px hsl(263 74% 50% / .25);
+  background: linear-gradient(145deg, hsl(145 72% 48%), hsl(165 74% 38%));
+  box-shadow: 0 7px 18px hsl(145 72% 42% / .25);
 }
-.soft-shadow { box-shadow: 0 14px 36px hsl(248 28% 22% / .07), 0 2px 7px hsl(248 28% 22% / .04); }
+.soft-shadow {   box-shadow: 0 14px 36px hsl(145 30% 2% / .35), 0 2px 7px hsl(145 30% 2% / .18); }
 .rise-in { animation: rise-in .45s cubic-bezier(.2,.8,.2,1) both; }
 .rise-in-delay-1 { animation-delay: .06s; }
 .rise-in-delay-2 { animation-delay: .12s; }
