@@ -24,7 +24,8 @@ router.get("/projects/:projectId/agent-runs/:runId", authMiddleware, async (req:
 });
 
 router.get("/projects/:projectId/activity", authMiddleware, async (req: AuthenticatedRequest, res) => {
-  res.json(await listAgentEvents(String(req.params.projectId), req.user!.id));
+  const events = await listAgentEvents(String(req.params.projectId), req.user!.id);
+  res.json(events.map((event) => ({ id: event.id, label: event.label, detail: event.detail, status: event.status, timestamp: event.createdAt })));
 });
 
 router.post("/projects/:projectId/agent-runs", authMiddleware, async (req: AuthenticatedRequest, res) => {
