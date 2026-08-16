@@ -51,11 +51,12 @@ function useCurrentUser() { const [user, setUser] = useState<{ name: string; ema
 
 function AppShell({ children }: { children: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
   const [location] = useLocation();
   const { toast } = useToast();
   const user = useCurrentUser();
   return <div className="min-h-[100dvh] bg-background">
-    <aside className={`fixed inset-y-0 left-0 z-40 flex w-[238px] flex-col border-r border-sidebar-border bg-sidebar px-3 py-4 transition-transform duration-200 lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+    <aside className={`fixed inset-y-0 left-0 z-40 flex w-[238px] flex-col border-r border-sidebar-border bg-sidebar px-3 py-4 transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarVisible ? 'lg:translate-x-0' : 'lg:-translate-x-full'}`}>
       <div className="flex items-center justify-between px-3 pb-8"><Brand /><button type="button" onClick={() => setSidebarOpen(false)} className="text-sidebar-foreground/50 lg:hidden" data-testid="button-close-sidebar"><X size={18} /></button></div>
       <div className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[.16em] text-sidebar-foreground/40">Workspace</div>
       <nav className="space-y-1" aria-label="Main navigation">
@@ -72,9 +73,9 @@ function AppShell({ children }: { children: ReactNode }) {
       </div>
     </aside>
     {sidebarOpen && <button aria-label="Close navigation" type="button" onClick={() => setSidebarOpen(false)} className="fixed inset-0 z-30 bg-sidebar/30 backdrop-blur-sm lg:hidden" data-testid="button-sidebar-overlay" />}
-    <main className="min-h-[100dvh] lg:pl-[238px]">
+    <main className={`min-h-[100dvh] transition-[padding] duration-200 ${sidebarVisible ? 'lg:pl-[238px]' : 'lg:pl-0'}`}>
       <header className="sticky top-0 z-20 flex h-[66px] items-center border-b border-border/80 bg-background/90 px-4 backdrop-blur-md sm:px-7">
-        <button type="button" onClick={() => setSidebarOpen(true)} className="mr-3 rounded-md p-1.5 text-muted-foreground hover:bg-muted lg:hidden" data-testid="button-open-sidebar"><Menu size={19} /></button>
+        <button type="button" onClick={() => { setSidebarVisible((value) => !value); setSidebarOpen(false); }} className="mr-3 rounded-md p-1.5 text-muted-foreground hover:bg-muted" data-testid="button-toggle-sidebar" aria-label={sidebarVisible ? 'Hide sidebar' : 'Show sidebar'}><Menu size={19} /></button>
         <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground"><span className="hidden sm:inline">Firebox workspace</span><span className="hidden text-border sm:inline">/</span><span className="truncate font-medium text-foreground">{location === '/' ? 'Overview' : location.split('/')[1] === 'workspace' ? 'Active project' : location.split('/')[1]}</span></div>
         <div className="ml-auto flex items-center gap-2"><button type="button" onClick={() => toast({ title: 'Command search', description: 'Search is ready for your next workspace action.' })} className="hidden items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1.5 text-xs text-muted-foreground shadow-sm hover:bg-muted sm:flex" data-testid="button-command-menu"><Search size={13} /> Search <kbd className="ml-3 rounded border border-border px-1 font-mono text-[9px]">⌘ K</kbd></button><button type="button" onClick={() => toast({ title: 'You’re all caught up', description: 'No new workspace notifications.' })} className="rounded-md p-2 text-muted-foreground hover:bg-muted" data-testid="button-notifications"><CircleDot size={17} /></button></div>
       </header>
